@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Carrito de Compras</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background-color: #f4f4f4;
+      color: #333;
+    }
+
+    .header-alimentos {
+      background-color: #6CA600;
+      color: white;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-alimentos h1 span {
+      font-size: 2em;
+      font-weight: bold;
+    }
+
+    .zona-superior-derecha {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .barra-busqueda-principal input {
+      padding: 8px;
+      border: none;
+      border-radius: 4px 0 0 4px;
+    }
+
+    .barra-busqueda-principal button {
+      padding: 8px 12px;
+      border: none;
+      background-color: white;
+      color: #6CA600;
+      border-radius: 0 4px 4px 0;
+      cursor: pointer;
+    }
+
+    .boton-carrito {
+      background-color: #6CA600;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.9em;
+      cursor: pointer;
+    }
+
+    .logo-tottus {
+      text-decoration: none;
+      color: white;
+    }
+
+    .carrito-contenedor {
+      max-width: 1000px;
+      margin: 30px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .producto-carrito {
+      border: 1px solid #ddd;
+      padding: 15px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      background: #fafafa;
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .producto-carrito img {
+      width: 100px;
+      border-radius: 5px;
+    }
+
+    .producto-info {
+      flex: 1;
+    }
+
+    .acciones {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .acciones .cantidad-actual {
+      font-weight: bold;
+      color: #333;
+    }
+
+    .acciones button {
+      padding: 5px 10px;
+      background-color: #6CA600;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .acciones .eliminar {
+      background-color: red;
+    }
+
+    .resumen-orden {
+      background: #f9f9f9;
+      border-top: 1px solid #ddd;
+      padding: 20px;
+      text-align: right;
+      margin-top: 20px;
+    }
+
+    .resumen-orden button {
+      margin-left: 10px;
+    }
+
+    .btn-vaciar {
+      background-color: #888;
+    }
+
+    .btn-pagar {
+      background-color: #6CA600;
+    }
+
+    .carrito-vacio {
+      text-align: center;
+      margin-top: 50px;
+    }
+
+    .carrito-vacio img {
+      width: 120px;
+      margin-bottom: 15px;
+    }
+
+    .carrito-vacio a {
+      display: inline-block;
+      margin-top: 10px;
+      color: #6CA600;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    .carrito-vacio a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+<header class="header-alimentos">
+  <h1><a href="index.html" class="logo-tottus"><span>TOTTUS</span></a></h1>
+  <div class="zona-superior-derecha">
+    <div class="barra-busqueda-principal">
+      <input type="text" placeholder="Buscar alimentos...">
+      <button>Buscar</button>
+    </div>
+    <button class="boton-carrito">🛒 Carrito</button>
+  </div>
+</header>
+
+<main class="carrito-contenedor">
+  <h2>Carrito de Compras</h2>
+  <div id="carrito-productos"></div>
+
+  <div class="resumen-orden">
+    <p><strong>Subtotal:</strong> <span id="subtotal">S/ 0.00</span></p>
+    <button class="btn-vaciar" id="vaciar-carrito">Vaciar carrito</button>
+    <button class="btn-pagar">Ir a Pagar</button>
+  </div>
+
+  <div id="carrito-vacio" class="carrito-vacio">
+    <img src="imagenes/carrito-vacio.png" alt="Carrito vacío" />
+    <p>No has agregado productos a tu carrito.</p>
+    <a href="index.html">Volver a la tienda →</a>
+  </div>
+</main>
+
+<script>
+  function renderizarCarrito() {
+    const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+    const contenedor = document.getElementById("carrito-productos");
+    const subtotal = document.getElementById("subtotal");
+    const vacio = document.getElementById("carrito-vacio");
+
+    contenedor.innerHTML = "";
+    let total = 0;
+
+    if (carrito.length === 0) {
+      contenedor.style.display = "none";
+      vacio.style.display = "block";
+      subtotal.textContent = "S/ 0.00";
+    } else {
+      contenedor.style.display = "block";
+      vacio.style.display = "none";
+
+      carrito.forEach((item, index) => {
+        const totalProducto = (item.precio * item.cantidad).toFixed(2);
+        total += parseFloat(totalProducto);
+
+        const div = document.createElement("div");
+        div.classList.add("producto-carrito");
+
+        div.innerHTML = `
+          <img src="${item.imagen}" alt="${item.nombre}">
+          <div class="producto-info">
+            <p><strong>${item.nombre}</strong></p>
+            <p>S/ ${item.precio.toFixed(2)} x ${item.cantidad} = <strong>S/ ${totalProducto}</strong></p>
+          </div>
+          <div class="acciones">
+            <div class="cantidad-actual">${item.cantidad}</div>
+            <button class="btn-restar" data-index="${index}">-</button>
+            <button class="btn-sumar" data-index="${index}">+</button>
+            <button class="eliminar" data-index="${index}">✖</button>
+          </div>
+        `;
+
+        contenedor.appendChild(div);
+      });
+
+      subtotal.textContent = `S/ ${total.toFixed(2)}`;
+
+      document.querySelectorAll(".btn-restar").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          const i = e.target.dataset.index;
+          if (carrito[i].cantidad > 1) {
+            carrito[i].cantidad -= 1;
+            localStorage.setItem("carrito", JSON.stringify(carrito));
+            renderizarCarrito();
+          }
+        });
+      });
+
+      document.querySelectorAll(".btn-sumar").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          const i = e.target.dataset.index;
+          carrito[i].cantidad += 1;
+          localStorage.setItem("carrito", JSON.stringify(carrito));
+          renderizarCarrito();
+        });
+      });
+
+      document.querySelectorAll(".eliminar").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          const i = e.target.dataset.index;
+          carrito.splice(i, 1);
+          localStorage.setItem("carrito", JSON.stringify(carrito));
+          renderizarCarrito();
+        });
+      });
+    }
+  }
+
+  document.getElementById("vaciar-carrito").addEventListener("click", () => {
+    localStorage.removeItem("carrito");
+    renderizarCarrito();
+  });
+
+  document.addEventListener("DOMContentLoaded", renderizarCarrito);
+</script>
+
+</body>
+</html>
