@@ -102,11 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 fetch('http://localhost:3000/api/mensaje')
   .then(res => res.json())
-  .then(data => {
-    const mensajeEl = document.getElementById('mensaje');
-    mensajeEl.textContent = data.mensaje;
-    mensajeEl.style.display = 'block';
-  });
+  .then(data => console.log(data));
 
 
 
