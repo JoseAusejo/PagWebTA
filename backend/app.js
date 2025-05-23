@@ -21,12 +21,11 @@ app.get('/api/saludo/:nombre', (req, res) => {
 });
 
 // Servir archivos estáticos del frontend
-app.use(express.static(path.join(__dirname, '../frontend')));
-
-// Para cualquier otra ruta que no sea API y no sea archivo estático, devolver index.html
+app.use(express.static(path.join(__dirname, '../public')));
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/index.html'));
+  res.sendFile(path.join(__dirname, '../public/index.html'));
 });
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
