@@ -4,10 +4,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const carritoVacio = document.getElementById("carrito-vacio");
   const alerta = document.getElementById("alerta-carrito");
 
-  // Cambiar automáticamente la URL del backend según entorno
   const API_BASE_URL = window.location.hostname.includes('localhost')
     ? 'http://localhost:3000/api'
-    : 'https://tu-backend-en-render.onrender.com/api'; // ⚠️ Cambia por tu dominio real en Render
+    : 'https://tu-backend-en-render.onrender.com/api';
 
   let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
 
@@ -18,9 +17,8 @@ document.addEventListener("DOMContentLoaded", () => {
   function mostrarAlerta(mensaje, tipo = "info") {
     if (!alerta) return;
     alerta.textContent = mensaje;
-    alerta.className = tipo; // 'info' o 'error'
+    alerta.className = tipo;
     alerta.style.display = "block";
-
     setTimeout(() => {
       alerta.style.display = "none";
     }, 3000);
@@ -34,7 +32,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     carrito.forEach((item, index) => {
       total += item.precio * item.cantidad;
-
       const li = document.createElement("li");
       li.innerHTML = `
         ${item.nombre} - S/ ${item.precio.toFixed(2)} x 
@@ -75,12 +72,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  document.querySelectorAll(".boton-comprar").forEach(boton => {
-    boton.addEventListener("click", () => {
+  document.body.addEventListener("click", (e) => {
+    if (e.target.classList.contains("boton-comprar")) {
+      const boton = e.target;
       const producto = boton.closest(".producto");
-      const nombre = producto.querySelector("h3").textContent;
-      const precioTexto = producto.querySelector(".precio").textContent;
-      const precio = parseFloat(precioTexto.replace(/[^\d.]/g, ""));
+      if (!producto) return;
+
+      const nombre = producto.querySelector("h3")?.textContent || "";
+      const precioTexto = producto.querySelector(".precio")?.textContent || "0";
+      const precio = parseFloat(precioTexto.replace(/[^\d.]/g, "")) || 0;
       const imagen = producto.querySelector("img")?.getAttribute("src") || "";
 
       const existente = carrito.find(item => item.nombre === nombre);
@@ -94,25 +94,22 @@ document.addEventListener("DOMContentLoaded", () => {
       guardarCarrito();
       actualizarCarrito();
       mostrarAlerta("Se agregó al carrito.", "info");
-    });
+    }
   });
 
   if (listaCarrito && carrito.length > 0) {
     actualizarCarrito();
   }
 
-  // ✅ Llamada fetch corregida al backend
   fetch(`${API_BASE_URL}/obtener-mensaje`)
     .then(res => {
       if (!res.ok) throw new Error('Respuesta no válida del servidor');
       return res.json();
     })
     .then(data => {
-      console.log("Mensaje del backend:", data);
       mostrarAlerta(data.mensaje, "info");
     })
-    .catch(error => {
-      console.error("❌ Error al obtener el mensaje:", error);
+    .catch(() => {
       mostrarAlerta("No se pudo conectar con el servidor 😥", "error");
     });
 });
