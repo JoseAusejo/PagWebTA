@@ -179,17 +179,20 @@
   <!-- Scripts -->
   <script>
     // Código del slider
-    document.addEventListener("DOMContentLoaded", function () {
-      const slides = document.querySelectorAll('.slide');
-      const prevBtn = document.querySelector('.prev');
-      const nextBtn = document.querySelector('.next');
-      let currentIndex = 0;
+  
+  document.addEventListener("DOMContentLoaded", function () {
+    // ----- SLIDER -----
+    const slides = document.querySelectorAll('.slide');
+    const prevBtn = document.querySelector('.prev');
+    const nextBtn = document.querySelector('.next');
+    let currentIndex = 0;
 
-      function showSlide(index) {
-        slides.forEach(slide => slide.classList.remove('active'));
-        slides[index].classList.add('active');
-      }
+    function showSlide(index) {
+      slides.forEach(slide => slide.classList.remove('active'));
+      slides[index].classList.add('active');
+    }
 
+    if (prevBtn && nextBtn && slides.length > 0) {
       prevBtn.addEventListener('click', () => {
         currentIndex = (currentIndex === 0) ? slides.length - 1 : currentIndex - 1;
         showSlide(currentIndex);
@@ -199,9 +202,11 @@
         currentIndex = (currentIndex === slides.length - 1) ? 0 : currentIndex + 1;
         showSlide(currentIndex);
       });
-    });
 
-    // Carrito básico
+      showSlide(currentIndex); // Mostrar la primera slide al cargar
+    }
+
+    // ----- CARRITO -----
     const botonesComprar = document.querySelectorAll('.boton-comprar');
     const listaCarrito = document.getElementById('lista-carrito');
     const totalCarrito = document.getElementById('total-carrito');
@@ -211,8 +216,11 @@
     let carrito = [];
 
     function actualizarCarrito() {
+      if (!listaCarrito || !totalCarrito || !carritoVacio) return;
+
       listaCarrito.innerHTML = '';
       let total = 0;
+
       if (carrito.length === 0) {
         carritoVacio.style.display = 'block';
         totalCarrito.textContent = '';
@@ -229,32 +237,39 @@
     }
 
     function mostrarAlerta() {
+      if (!alertaCarrito) return;
       alertaCarrito.style.display = 'block';
       setTimeout(() => {
         alertaCarrito.style.display = 'none';
       }, 2000);
     }
 
-    botonesComprar.forEach((boton, index) => {
+    botonesComprar.forEach(boton => {
       boton.addEventListener('click', () => {
         const productoElem = boton.parentElement;
-        const nombre = productoElem.querySelector('h3').textContent;
-        const precioTexto = productoElem.querySelector('.precio').textContent;
+        const nombre = productoElem.querySelector('h3')?.textContent || '';
+        const precioTexto = productoElem.querySelector('.precio')?.textContent || '';
         const precio = parseFloat(precioTexto.replace(/[^\d.,]/g, '').replace(',', '.'));
+
+        if (!nombre || isNaN(precio)) return;
+
         const existente = carrito.find(p => p.nombre === nombre);
         if (existente) {
           existente.cantidad++;
         } else {
           carrito.push({ nombre, precio, cantidad: 1 });
         }
+
         actualizarCarrito();
         mostrarAlerta();
       });
     });
 
-    // Obtener mensaje del backend y mostrarlo
+    // ----- MENSAJE BACKEND -----
     async function cargarMensaje() {
       const pMensaje = document.getElementById('mensaje');
+      if (!pMensaje) return;
+
       try {
         const respuesta = await fetch('/api/mensaje');
         if (!respuesta.ok) throw new Error('Error en la respuesta');
@@ -262,19 +277,16 @@
         if (data.mensaje) {
           pMensaje.textContent = data.mensaje;
           pMensaje.style.display = 'block';
-        } else {
-          pMensaje.textContent = 'No se encontró ningún mensaje.';
-          pMensaje.style.display = 'block';
         }
       } catch (error) {
-        pMensaje.textContent = 'No se pudo obtener el mensaje del backend.';
-        pMensaje.style.display = 'block';
-        console.error(error);
+        console.error('Error al cargar el mensaje:', error);
       }
     }
 
     cargarMensaje();
-  </script>
+  });
+</script>
+
 </body>
 
 </html>
