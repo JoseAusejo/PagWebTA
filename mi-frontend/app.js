@@ -1,11 +1,13 @@
-çdocument.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => {
   const listaCarrito = document.getElementById("lista-carrito");
   const totalCarrito = document.getElementById("total-carrito");
   const carritoVacio = document.getElementById("carrito-vacio");
   const alerta = document.getElementById("alerta-carrito");
 
-  // Cambiar esta URL según entorno (localhost o producción)
-  const API_BASE_URL = 'http://localhost:3000/api';
+  // Cambiar automáticamente la URL del backend según entorno
+  const API_BASE_URL = window.location.hostname.includes('localhost')
+    ? 'http://localhost:3000/api'
+    : 'https://tu-backend-en-render.onrender.com/api'; // ⚠️ Cambia por tu dominio real en Render
 
   let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
 
@@ -99,8 +101,8 @@
     actualizarCarrito();
   }
 
-  // Llamada fetch al backend API
-  fetch(`${API_BASE_URL}/mensaje`)
+  // ✅ Llamada fetch corregida al backend
+  fetch(`${API_BASE_URL}/obtener-mensaje`)
     .then(res => {
       if (!res.ok) throw new Error('Respuesta no válida del servidor');
       return res.json();
@@ -113,6 +115,4 @@
       console.error("❌ Error al obtener el mensaje:", error);
       mostrarAlerta("No se pudo conectar con el servidor 😥", "error");
     });
-}
-
-);
+});
