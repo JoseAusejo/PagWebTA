@@ -1,23 +1,58 @@
 // 📦 Importaciones
 const express = require('express');
 const cors = require('cors');
-require('dotenv').config(); // Cargar variables de entorno
+require('dotenv').config();
+const { Pool } = require('pg');
 
 const app = express();
 
 // 🔐 Middleware
-app.use(cors()); // Permitir CORS
-app.use(express.json()); // Habilitar JSON
+app.use(cors());
+app.use(express.json());
 
-// 🔑 Acceso a API Key y conexión a base de datos desde variables de entorno
+// 🔑 Variables de entorno
 const apiKey = process.env.API_KEY;
-const dbUrl = process.env.DATABASE_URL;
 
-// 🔌 Conectar a base de datos (ejemplo general, puedes cambiarlo luego)
-console.log('Conectando a la base de datos en:', dbUrl);
-// Aquí iría la lógica real de conexión, según uses MongoDB, PostgreSQL, etc.
+// 🔌 Configuración dinámica para PostgreSQL
+let pool;
 
-// 🛠️ Rutas API
+if (process.env.DATABASE_URL) {
+  // 👉 Usar DATABASE_URL (modo producción o Render)
+  pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+      rejectUnauthorized: false, // necesario si tu hosting lo requiere (Render lo usa)
+    },
+  });
+  console.log('Usando DATABASE_URL para conectar a la base de datos.');
+} else {
+  // 👉 Usar variables separadas (modo local)
+  pool = new Pool({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASS,
+    database: process.env.DB_NAME,
+    port: 5432,
+  });
+  console.log('Usando configuración local para conectar a la base de datos.');
+}
+
+// Probar conexión
+pool.connect()
+  .then(client => {
+    console.log('✅ Conexión a la base de datos exitosa');
+    client.release();
+  })
+  .catch(err => {
+    console.error('❌ Error conectando a la base de datos:', err);
+  });
+
+// ✅ Endpoint de health check para Render
+app.get('/healthz', (req, res) => {
+  res.status(200).send('OK');
+});
+
+// 🔁 Rutas de tu API
 app.get('/api/obtener-mensaje', (req, res) => {
   res.json({ mensaje: 'Hola desde el backend' });
 });
