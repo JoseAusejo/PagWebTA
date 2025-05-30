@@ -1,4 +1,4 @@
 
 
 # Ignorar configuraciones locales
-.env
+*.env
