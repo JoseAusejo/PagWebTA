@@ -1,7 +1,8 @@
-// 📦 Importaciones
+// 📦 Importaciones y carga de variables de entorno al inicio
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
-require('dotenv').config();
 const { Pool } = require('pg');
 
 const app = express();
@@ -21,7 +22,7 @@ if (process.env.DATABASE_URL) {
   pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: {
-      rejectUnauthorized: false, // necesario si tu hosting lo requiere (Render lo usa)
+      rejectUnauthorized: false,
     },
   });
   console.log('Usando DATABASE_URL para conectar a la base de datos.');
