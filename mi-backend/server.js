@@ -1,5 +1,7 @@
-// 📦 Importaciones y carga de variables de entorno al inicio
-require('dotenv').config();
+// 📦 Importaciones y carga dinámica de variables de entorno según NODE_ENV
+const dotenv = require('dotenv');
+const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env';
+dotenv.config({ path: envFile });
 
 const express = require('express');
 const cors = require('cors');
