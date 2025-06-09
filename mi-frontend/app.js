@@ -113,3 +113,7 @@ document.addEventListener("DOMContentLoaded", () => {
       mostrarAlerta("No se pudo conectar con el servidor 😥", "error");
     });
 });
+
+
+// Después
+fetch('https://TU-PROYECTO-BACKEND.vercel.app/api/mensaje');
