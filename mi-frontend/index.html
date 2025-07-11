@@ -4,12 +4,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
   <title>Sección de Alimentos Mejorada</title>
-
   <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
   <p id="mensaje" style="display: none;">Esperando mensaje del backend...</p>
 
@@ -69,7 +66,7 @@
 
     <section class="productos-destacados">
       <h2>Destacados de la Semana</h2>
-      <div class="lista-productos">
+      <div class="lista-productos" id="contenedor-productos">
         <div class="producto">
           <img src="imagenes/pasteleria43.png" alt="Turrón de Doña Pepa 500g" />
           <h3>Turrón de Doña Pepa 500g</h3>
@@ -179,116 +176,185 @@
     Se agregó al carrito.
   </div>
 
-  <!-- Scripts -->
-  <script>
-    // Código del slider
-  
-  document.addEventListener("DOMContentLoaded", function () {
-    // ----- SLIDER -----
-    const slides = document.querySelectorAll('.slide');
-    const prevBtn = document.querySelector('.prev');
-    const nextBtn = document.querySelector('.next');
-    let currentIndex = 0;
+<!-- Scripts -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  // ----- SLIDER -----
+  const slides = document.querySelectorAll('.slide');
+  const prevBtn = document.querySelector('.prev');
+  const nextBtn = document.querySelector('.next');
+  let currentIndex = 0;
 
-    function showSlide(index) {
-      slides.forEach(slide => slide.classList.remove('active'));
-      slides[index].classList.add('active');
-    }
+  function showSlide(index) {
+    slides.forEach(slide => slide.classList.remove('active'));
+    slides[index].classList.add('active');
+  }
 
-    if (prevBtn && nextBtn && slides.length > 0) {
-      prevBtn.addEventListener('click', () => {
-        currentIndex = (currentIndex === 0) ? slides.length - 1 : currentIndex - 1;
-        showSlide(currentIndex);
-      });
-
-      nextBtn.addEventListener('click', () => {
-        currentIndex = (currentIndex === slides.length - 1) ? 0 : currentIndex + 1;
-        showSlide(currentIndex);
-      });
-
-      showSlide(currentIndex); // Mostrar la primera slide al cargar
-    }
-
-    // ----- CARRITO -----
-    const botonesComprar = document.querySelectorAll('.boton-comprar');
-    const listaCarrito = document.getElementById('lista-carrito');
-    const totalCarrito = document.getElementById('total-carrito');
-    const carritoVacio = document.getElementById('carrito-vacio');
-    const alertaCarrito = document.getElementById('alerta-carrito');
-
-    let carrito = [];
-
-    function actualizarCarrito() {
-      if (!listaCarrito || !totalCarrito || !carritoVacio) return;
-
-      listaCarrito.innerHTML = '';
-      let total = 0;
-
-      if (carrito.length === 0) {
-        carritoVacio.style.display = 'block';
-        totalCarrito.textContent = '';
-      } else {
-        carritoVacio.style.display = 'none';
-        carrito.forEach(item => {
-          const li = document.createElement('li');
-          li.textContent = `${item.nombre} - S/ ${item.precio.toFixed(2)} x ${item.cantidad}`;
-          listaCarrito.appendChild(li);
-          total += item.precio * item.cantidad;
-        });
-        totalCarrito.textContent = `Total: S/ ${total.toFixed(2)}`;
-      }
-    }
-
-    function mostrarAlerta() {
-      if (!alertaCarrito) return;
-      alertaCarrito.style.display = 'block';
-      setTimeout(() => {
-        alertaCarrito.style.display = 'none';
-      }, 2000);
-    }
-
-    botonesComprar.forEach(boton => {
-      boton.addEventListener('click', () => {
-        const productoElem = boton.parentElement;
-        const nombre = productoElem.querySelector('h3')?.textContent || '';
-        const precioTexto = productoElem.querySelector('.precio')?.textContent || '';
-        const precio = parseFloat(precioTexto.replace(/[^\d.,]/g, '').replace(',', '.'));
-
-        if (!nombre || isNaN(precio)) return;
-
-        const existente = carrito.find(p => p.nombre === nombre);
-        if (existente) {
-          existente.cantidad++;
-        } else {
-          carrito.push({ nombre, precio, cantidad: 1 });
-        }
-
-        actualizarCarrito();
-        mostrarAlerta();
-      });
+  if (prevBtn && nextBtn && slides.length > 0) {
+    prevBtn.addEventListener('click', () => {
+      currentIndex = (currentIndex === 0) ? slides.length - 1 : currentIndex - 1;
+      showSlide(currentIndex);
     });
 
-    // ----- MENSAJE BACKEND -----
-    async function cargarMensaje() {
-      const pMensaje = document.getElementById('mensaje');
-      if (!pMensaje) return;
+    nextBtn.addEventListener('click', () => {
+      currentIndex = (currentIndex === slides.length - 1) ? 0 : currentIndex + 1;
+      showSlide(currentIndex);
+    });
 
-      try {
-        const respuesta = await fetch('/api/mensaje');
-        if (!respuesta.ok) throw new Error('Error en la respuesta');
-        const data = await respuesta.json();
-        if (data.mensaje) {
-          pMensaje.textContent = data.mensaje;
-          pMensaje.style.display = 'block';
-        }
-      } catch (error) {
-        console.error('Error al cargar el mensaje:', error);
-      }
+    showSlide(currentIndex); // Mostrar la primera slide al cargar
+  }
+
+  // ----- CARRITO LOCAL -----
+  const botonesComprar = document.querySelectorAll('.boton-comprar');
+  const listaCarrito = document.getElementById('lista-carrito');
+  const totalCarrito = document.getElementById('total-carrito');
+  const carritoVacio = document.getElementById('carrito-vacio');
+  const alertaCarrito = document.getElementById('alerta-carrito');
+
+  let carrito = [];
+
+  function actualizarCarrito() {
+    if (!listaCarrito || !totalCarrito || !carritoVacio) return;
+
+    listaCarrito.innerHTML = '';
+    let total = 0;
+
+    if (carrito.length === 0) {
+      carritoVacio.style.display = 'block';
+      totalCarrito.textContent = '';
+    } else {
+      carritoVacio.style.display = 'none';
+      carrito.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = `${item.nombre} - S/ ${item.precio.toFixed(2)} x ${item.cantidad}`;
+        listaCarrito.appendChild(li);
+        total += item.precio * item.cantidad;
+      });
+      totalCarrito.textContent = `Total: S/ ${total.toFixed(2)}`;
     }
+  }
 
-    cargarMensaje();
+  function mostrarAlerta(texto = 'Se agregó al carrito.', esError = false) {
+    if (!alertaCarrito) return;
+    alertaCarrito.textContent = texto;
+    alertaCarrito.style.backgroundColor = esError ? '#b00020' : '#6CA600';
+    alertaCarrito.style.display = 'block';
+    setTimeout(() => {
+      alertaCarrito.style.display = 'none';
+    }, 2000);
+  }
+
+  botonesComprar.forEach(boton => {
+    boton.addEventListener('click', () => {
+      const productoElem = boton.parentElement;
+      const nombre = productoElem.querySelector('h3')?.textContent || '';
+      const precioTexto = productoElem.querySelector('.precio')?.textContent || '';
+      const precio = parseFloat(precioTexto.replace(/[^\d.,]/g, '').replace(',', '.'));
+
+      if (!nombre || isNaN(precio)) return;
+
+      const existente = carrito.find(p => p.nombre === nombre);
+      if (existente) {
+        existente.cantidad++;
+      } else {
+        carrito.push({ nombre, precio, cantidad: 1 });
+      }
+
+      actualizarCarrito();
+      mostrarAlerta();
+    });
   });
+
+  // ----- MENSAJE BACKEND -----
+  async function cargarMensaje() {
+    const pMensaje = document.getElementById('mensaje');
+    if (!pMensaje) return;
+
+    try {
+      const respuesta = await fetch('/api/obtener-mensaje');
+      if (!respuesta.ok) throw new Error('Error en la respuesta');
+      const data = await respuesta.json();
+      if (data.mensaje) {
+        pMensaje.textContent = data.mensaje;
+        pMensaje.style.display = 'block';
+      }
+    } catch (error) {
+      console.error('Error al cargar el mensaje:', error);
+    }
+  }
+
+  cargarMensaje();
+
+  // ========================
+  // 🔁 NUEVO BLOQUE: Conexión a backend de productos y compras
+  // ========================
+
+  const contenedor = document.getElementById('contenedor-productos');
+  const emailUsuario = 'usuario@gmail.com'; // Puedes usar localStorage o login más adelante
+
+  async function cargarProductos() {
+    try {
+      const res = await fetch('http://localhost:3000/api/productos');
+      const productos = await res.json();
+
+      contenedor.innerHTML = '';
+
+      productos.forEach(p => {
+        const div = document.createElement('div');
+        div.classList.add('producto');
+        div.innerHTML = `
+          <img src="imagenes/${p.imagen}" alt="${p.nombre}" />
+          <h3>${p.nombre}</h3>
+          <p class="precio">S/ ${p.precio.toFixed(2)} / UN</p>
+          <button class="boton-comprar" data-id="${p.id}">Agregar al carrito</button>
+        `;
+        contenedor.appendChild(div);
+      });
+
+      conectarBotonesBackend();
+    } catch (err) {
+      console.error('Error cargando productos:', err);
+    }
+  }
+
+  function conectarBotonesBackend() {
+    const botones = document.querySelectorAll('.boton-comprar');
+    botones.forEach(boton => {
+      boton.addEventListener('click', async () => {
+        const id = boton.getAttribute('data-id');
+        if (!id) return; // si es producto estático
+
+        try {
+          const res = await fetch('http://localhost:3000/api/comprar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              producto_id: parseInt(id),
+              email: emailUsuario
+            })
+          });
+
+          const data = await res.json();
+
+          if (res.ok) {
+            mostrarAlerta('✅ Compra simulada registrada');
+          } else {
+            mostrarAlerta(data.error || '❌ Error al comprar', true);
+          }
+        } catch (e) {
+          mostrarAlerta('❌ Error de red', true);
+        }
+      });
+    });
+  }
+
+  // Solo carga si existe el contenedor dinámico
+  if (document.getElementById('contenedor-productos')) {
+    cargarProductos();
+  }
+});
 </script>
+
 
 </body>
 

@@ -51,12 +51,12 @@ pool.connect()
     console.error('❌ Error conectando a la base de datos:', err);
   });
 
-// ✅ Endpoint de health check para Render
+//  Endpoint de health check para Render
 app.get('/healthz', (req, res) => {
   res.status(200).send('OK');
 });
 
-// 🔁 Rutas de tu API
+//  Rutas de tu API
 app.get('/api/obtener-mensaje', (req, res) => {
   res.json({ mensaje: 'Hola desde el backend' });
 });
@@ -73,7 +73,7 @@ app.get('/api/saludo/:nombre', (req, res) => {
 });
 
 
-// ✅ NUEVO 1: Endpoint para obtener productos desde la base de datos
+//  NUEVO 1: Endpoint para obtener productos desde la base de datos
 app.get('/api/productos', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM productos');
@@ -84,7 +84,7 @@ app.get('/api/productos', async (req, res) => {
   }
 });
 
-// ✅ NUEVO 2: Endpoint para simular compra y enviar correo
+//  NUEVO 2: Endpoint para simular compra y enviar correo
 app.post('/api/comprar', async (req, res) => {
   const { email, producto_id } = req.body;
 
@@ -128,7 +128,7 @@ app.post('/api/comprar', async (req, res) => {
   }
 });
 
-// 🚀 Iniciar servidor
+//  Iniciar servidor
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor escuchando en http://localhost:${PORT}`);
