@@ -24,15 +24,19 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px; /* Ajusta el padding para el tamaño vertical del rectángulo */
-    background-color: #6CA600; /* Nuevo color verde de la empresa */
+    padding: 10px 0; /* Ajusta el padding para el tamaño vertical del rectángulo */
+    background-color: #e1e7d6; /* Nuevo color verde de la empresa */
     color: white;
-    border-bottom: 1px solid #5B8C00; /* Verde más oscuro para el borde inferior (opcional) */
+    text-align: center;
+    border-bottom: 1px solid #acb49b; /* Verde más oscuro para el borde inferior (opcional) */
     margin-bottom: 20px;
     border-radius: 8px 8px 0 0; /* Bordes redondeados superiores (opcional) */
     /* No definas aquí un ancho o alto fijo que pueda afectar el tamaño del rectángulo */
 }
-
+#logo {
+  height: 250px;
+  
+}
 .header-alimentos h1 {
     margin: 0;
     color: white;

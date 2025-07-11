@@ -6,6 +6,7 @@ dotenv.config({ path: envFile });
 const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
+const nodemailer = require('nodemailer'); // ✅ Se agrega para enviar correos
 
 const app = express();
 
@@ -69,6 +70,62 @@ app.post('/api/enviar', (req, res) => {
 app.get('/api/saludo/:nombre', (req, res) => {
   const nombre = req.params.nombre;
   res.json({ mensaje: `Hola, ${nombre}, desde el backend!` });
+});
+
+
+// ✅ NUEVO 1: Endpoint para obtener productos desde la base de datos
+app.get('/api/productos', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM productos');
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error al obtener productos:', err);
+    res.status(500).json({ error: 'Error al obtener productos' });
+  }
+});
+
+// ✅ NUEVO 2: Endpoint para simular compra y enviar correo
+app.post('/api/comprar', async (req, res) => {
+  const { email, producto_id } = req.body;
+
+  try {
+    const productoRes = await pool.query('SELECT * FROM productos WHERE id = $1', [producto_id]);
+    const producto = productoRes.rows[0];
+
+    if (!producto || producto.stock <= 0) {
+      return res.status(400).json({ error: 'Producto no disponible' });
+    }
+
+    // Descontar stock
+    await pool.query('UPDATE productos SET stock = stock - 1 WHERE id = $1', [producto_id]);
+
+    // Registrar compra
+    await pool.query(
+      'INSERT INTO compras (producto_id, email, fecha) VALUES ($1, $2, NOW())',
+      [producto_id, email]
+    );
+
+    // Enviar correo de confirmación
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    await transporter.sendMail({
+      from: 'Simulación Tienda <no-reply@tienda.com>',
+      to: email,
+      subject: 'Compra Simulada Confirmada',
+      html: `<p>Has comprado: <strong>${producto.nombre}</strong></p><p>Gracias por usar nuestra simulación de tienda.</p>`,
+    });
+
+    res.json({ mensaje: 'Compra registrada y correo enviado correctamente.' });
+  } catch (err) {
+    console.error('Error al procesar compra:', err);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
 });
 
 // 🚀 Iniciar servidor
