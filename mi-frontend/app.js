@@ -4,9 +4,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const carritoVacio = document.getElementById("carrito-vacio");
   const alerta = document.getElementById("alerta-carrito");
 
-  const API_BASE_URL = window.location.hostname.includes('localhost')
-    ? 'http://localhost:3000/api'
-    : 'https://tu-backend-en-render.onrender.com/api';
+  const API_BASE_URL = window.location.hostname.includes("localhost")
+    ? "http://localhost:3000/api"
+    : "https://tu-backend-en-render.onrender.com/api";
 
   let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
 
@@ -94,6 +94,32 @@ document.addEventListener("DOMContentLoaded", () => {
       guardarCarrito();
       actualizarCarrito();
       mostrarAlerta("Se agregó al carrito.", "info");
+
+      // Enviar al backend si tiene productoId
+      const productoId = boton.getAttribute("data-id");
+      const emailUsuario = "usuario@gmail.com"; // Reemplázalo si usas auth
+
+      if (productoId) {
+        fetch(`${API_BASE_URL}/comprar`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            producto_id: parseInt(productoId),
+            email: emailUsuario
+          })
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (data.mensaje) {
+              mostrarAlerta(data.mensaje, "info");
+            } else if (data.error) {
+              mostrarAlerta(data.error, "error");
+            }
+          })
+          .catch(() => {
+            mostrarAlerta("No se pudo registrar la compra simulada ❌", "error");
+          });
+      }
     }
   });
 
@@ -101,19 +127,18 @@ document.addEventListener("DOMContentLoaded", () => {
     actualizarCarrito();
   }
 
+  // Obtener mensaje del backend
   fetch(`${API_BASE_URL}/obtener-mensaje`)
     .then(res => {
-      if (!res.ok) throw new Error('Respuesta no válida del servidor');
+      if (!res.ok) throw new Error("Respuesta no válida del servidor");
       return res.json();
     })
     .then(data => {
-      mostrarAlerta(data.mensaje, "info");
+      if (data.mensaje) {
+        mostrarAlerta(data.mensaje, "info");
+      }
     })
     .catch(() => {
       mostrarAlerta("No se pudo conectar con el servidor 😥", "error");
     });
 });
-
-
-// Después
-fetch('https://TU-PROYECTO-BACKEND.vercel.app/api/mensaje');
